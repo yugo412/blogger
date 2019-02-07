@@ -80,7 +80,7 @@ $singlePost = Blogger::postByPath($path, $blogId);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Cache
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Yugo\Blogger\Facades\Blogger;
 
