@@ -57,7 +57,7 @@ Before retrieving posts, pages, and comments, you know your blog idd first. To g
 
 ```
 $blog = Blogger::blog();
-``1
+```
 
 
 
@@ -75,7 +75,7 @@ $singlePost = Blogger::postByPath($path, $blogId);
 
 ## Best Practice
 
-```
+```php
 <?php
 
 namespace App\Http\Controllers;
