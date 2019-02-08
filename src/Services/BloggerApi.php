@@ -61,6 +61,23 @@ class BloggerApi
     }
 
     /**
+     * @param string $path
+     * @param array $query
+     * @return object
+     */
+    private function getRequest(string $path, array $query = []): object
+    {
+        $defaultQuery = [
+            'key' => $this->key,
+        ];
+
+        return $this->client->get($path, [
+            'headers' => $this->headers,
+            'query' => array_merge($defaultQuery, $query),
+        ]);
+    }
+
+    /**
      * @param array $post
      * @return string
      */
@@ -71,6 +88,7 @@ class BloggerApi
 
             return $url['path'];
         }
+
         return '';
     }
 
@@ -95,12 +113,9 @@ class BloggerApi
             abort(500, 'Invalid URL given.');
         }
 
-        $response = $this->client->get('byurl', [
-            'headers' => $this->headers,
-            'query'=> [
-                'key' => $this->key,
-                'url' => $url ?? $this->url,
-            ]
+        $response = $this->getRequest('byurl', [
+            'key' => $this->key,
+            'url' => $url ?? $this->url,
         ]);
 
         $body = json_decode((string) $response->getBody(), true);
@@ -124,12 +139,7 @@ class BloggerApi
      */
     public function posts(string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/posts', [
-            'headers' => $this->headers,
-            'query' => [
-                'key' => $this->key,
-            ]
-        ]);
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/posts');
 
         $body = json_decode((string) $response->getBody(), true);
 
@@ -163,11 +173,7 @@ class BloggerApi
      */
     public function postById(string $postId, string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/posts/'.$postId, [
-            'query' => [
-                'key' => $this->key,
-            ],
-        ]);
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/posts/'.$postId);
 
         $body = json_decode((string) $response->getBody(), true);
 
@@ -196,11 +202,8 @@ class BloggerApi
      */
     public function postByPath(string $path, string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/posts/bypath', [
-            'query' => [
-                'key' => $this->key,
-                'path' => $path
-            ],
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/posts/bypath', [
+            'path' => $path,
         ]);
 
         $body = json_decode((string) $response->getBody(), true);
@@ -230,12 +233,8 @@ class BloggerApi
      */
     public function search(string $keyword = '', string $blogId= null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/posts/search', [
-            'headers' => $this->headers,
-            'query' => [
-                'key' => $this->key,
-                'q' => $keyword,
-            ],
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/posts/search', [
+            'q' => $keyword,
         ]);
 
         $body = json_decode((string) $response->getBody(), true);
@@ -284,12 +283,7 @@ class BloggerApi
      */
     public function pages(string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/pages', [
-            'headers' => $this->headers,
-            'query' => [
-                'key' => $this->key,
-            ]
-        ]);
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/pages');
 
         $pages = json_decode((string) $response->getBody(), true);
 
@@ -323,12 +317,7 @@ class BloggerApi
      */
     public function page(string $pageId, string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/pages/'.$pageId, [
-            'headers' => $this->headers,
-            'query' => [
-                'key' => $this->key
-            ],
-        ]);
+        $response = $this->getRequest(($blogId ?? $this->blogId).'/pages/'.$pageId);
 
         $page = json_decode((string) $response->getBody(), true);
 
