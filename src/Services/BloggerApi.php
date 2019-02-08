@@ -250,9 +250,7 @@ class BloggerApi
                 return $item;
             });
 
-            if (isset($body['items'])) {
-                $body['items'] = $items->toArray();
-            }
+            $body['items'] = $items->toArray();
         }
 
         return $body;
@@ -260,21 +258,54 @@ class BloggerApi
 
     /**
      * @param string $postId
-     * @param string $blogId
+     * @param string|null $blogId
+     * @return array
      */
-    public function comments(string $postId, string $blogId)
+    public function comments(string $postId, string $blogId = null): array
     {
+        $path = vsprintf('%s/posts/%s/comments', [
+            ($blogId ?? $this->blogId),
+            $postId,
+        ]);
+        $response = $this->getRequest($path);
 
+        $comments = json_decode((string) $response->getBody(), true);
+        if (empty($comments)) {
+            return [];
+        }
+
+        if ($response->getStatusCode() != 200) {
+            Log::error($comments['error']['message'] ?? __('Comments not found.'), [
+                'post_id' => $postId,
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
+        }
+
+        return $comments;
     }
 
     /**
      * @param string $commentId
      * @param string $postId
-     * @param string $blogId
+     * @param string|null $blogId
+     * @return array
      */
-    public function comment(string $commentId, string $postId, string $blogId)
+    public function comment(string $commentId, string $postId, string $blogId = null): array
     {
+        $path = vsprintf('%s/posts/%s/comments/%s', [
+            $blogId ?? $blogId,
+            $postId,
+            $commentId,
+        ]);
 
+        $response = $this->getRequest($path);
+
+        $comment = json_decode((string) $response->getBody(), true);
+        if (empty($comment)) {
+            return [];
+        }
+
+        return $comment;
     }
 
     /**
