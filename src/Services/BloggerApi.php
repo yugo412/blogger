@@ -143,13 +143,15 @@ class BloggerApi
             ]);
         }
 
-        $items = collect($body['items'])->map(function ($item){
-            $item['path'] = $this->addPath($item);
+        if (!empty($body['items'])) {
+            $items = collect($body['items'])->map(function ($item){
+                $item['path'] = $this->addPath($item);
 
-            return $item;
-        });
+                return $item;
+            });
 
-        $body['items'] = $items->toArray();
+            $body['items'] = $items->toArray();
+        }
 
         return $body;
     }
@@ -214,7 +216,7 @@ class BloggerApi
             ]);
         }
 
-        if ($body['blog']) {
+        if (isset($body['blog'])) {
             $body['path'] = $this->addPath($body);
         }
 
