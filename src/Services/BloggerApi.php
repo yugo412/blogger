@@ -308,7 +308,7 @@ class BloggerApi
                 return $item;
             });
 
-            $pages['items'] = $items;
+            $pages['items'] = $items->toArray();
         }
 
         return $pages;
