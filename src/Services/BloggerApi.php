@@ -144,7 +144,7 @@ class BloggerApi
         }
 
         $items = collect($body['items'])->map(function ($item){
-            $item['blog']['path'] = $this->addPath($item);
+            $item['path'] = $this->addPath($item);
 
             return $item;
         });
@@ -181,7 +181,7 @@ class BloggerApi
         }
 
         if (isset($body['blog'])) {
-            $body['blog']['path'] = $this->addPath($body);
+            $body['path'] = $this->addPath($body);
         }
 
         return $body;
@@ -207,8 +207,15 @@ class BloggerApi
             return [];
         }
 
+        if ($response->getStatusCode() != 200) {
+            Log::error($response['error']['message'] ?? __('Post not found.'), [
+                'path' => $path,
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
+        }
+
         if ($body['blog']) {
-            $body['blog']['path'] = $this->addPath($body);
+            $body['path'] = $this->addPath($body);
         }
 
         return $body;
@@ -237,7 +244,7 @@ class BloggerApi
 
         if (! empty($body['items'])) {
             $items = collect($body['items'])->map(function ($item){
-                $item['blog']['path'] = $this->addPath($item);
+                $item['path'] = $this->addPath($item);
 
                 return $item;
             });
@@ -250,11 +257,20 @@ class BloggerApi
         return $body;
     }
 
+    /**
+     * @param string $postId
+     * @param string $blogId
+     */
     public function comments(string $postId, string $blogId)
     {
 
     }
 
+    /**
+     * @param string $commentId
+     * @param string $postId
+     * @param string $blogId
+     */
     public function comment(string $commentId, string $postId, string $blogId)
     {
 
@@ -266,7 +282,7 @@ class BloggerApi
      */
     public function pages(string $blogId = null): array
     {
-        $response = $this->client->get(($blogId ?? $this->blogId).'/pagess', [
+        $response = $this->client->get(($blogId ?? $this->blogId).'/pages', [
             'headers' => $this->headers,
             'query' => [
                 'key' => $this->key,
@@ -287,7 +303,7 @@ class BloggerApi
 
         if (! empty($pages['items'])) {
             $items = collect($pages['items'])->map(function ($item){
-                $item['blog']['path'] = $this->addPath($item);
+                $item['path'] = $this->addPath($item);
 
                 return $item;
             });
@@ -326,7 +342,7 @@ class BloggerApi
         }
 
         if (! empty($page['blog'])) {
-            $page['blog']['path'] = $this->addPath($page);
+            $page['path'] = $this->addPath($page);
         }
 
         return $page;
