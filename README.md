@@ -137,6 +137,25 @@ class BloggerController extends Controller
     }
 
     /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function comments(string $id): JsonResponse
+    {
+        return response()->json($this->blogger->comments($id));
+    }
+
+    /**
+     * @param string $post
+     * @param string $comment
+     * @return JsonResponse
+     */
+    public function comment(string $post, string $comment): JsonResponse
+    {
+        return response()->json($this->blogger->comment($comment, $post));
+    }
+
+    /**
      * @param Request $request
      * @return JsonResponse
      */
@@ -174,10 +193,16 @@ Next, you can define routes like this example in case you want access it directl
 Route::get('blogger/blog', 'BloggerController@blog');
 Route::get('blogger/posts', 'BloggerController@posts');
 Route::get('blogger/post/{id}', 'BloggerController@post');
+Route::get('blogger/post/{id}/comments', 'BloggerController@comments');
+Route::get('blogger/post/{post}/comment/{comment}', 'BloggerController@comments');
 Route::get('blogger/search', 'BloggerController@search');
 Route::get('blogger/pages', 'BloggerController@pages');
 Route::get('blogger/page/{id}', 'BloggerController@page');
 ```
+
+## Demo & Sample Code
+
+Full running application can be found at [blogger.aplikasi.live](blogger.aplikasi.live). You can look at the code from this [repository](https://github.com/arvernester/blogger-demo).
 
 ## License
 
