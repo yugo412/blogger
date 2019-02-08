@@ -142,7 +142,7 @@ class BloggerController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $this->validate([
+        $this->validate($request, [
             'keyword' => ['required', 'string'],
         ]);
 
