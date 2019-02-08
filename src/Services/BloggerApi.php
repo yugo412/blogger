@@ -19,11 +19,26 @@ class BloggerApi
      */
     private $key = '';
 
+    /**
+     * @var \Illuminate\Config\Repository|mixed|string
+     */
     private $url = '';
 
+    /**
+     * @var string
+     */
     private $blogId = '';
 
+    /**
+     * @var Client
+     */
     private $client;
+
+
+    /**
+     * @var array
+     */
+    private $headers = [];
 
     public function __construct()
     {
@@ -38,6 +53,11 @@ class BloggerApi
             'base_uri' => 'https://www.googleapis.com/blogger/v3/blogs/',
             'http_errors' => false,
         ]);
+
+        $this->headers = [
+            'Accept-Encoding' => 'gzip',
+            'User-Agent' => 'Laravel Blogger (gzip)',
+        ];
     }
 
     /**
@@ -76,6 +96,7 @@ class BloggerApi
         }
 
         $response = $this->client->get('byurl', [
+            'headers' => $this->headers,
             'query'=> [
                 'key' => $this->key,
                 'url' => $url ?? $this->url,
@@ -89,11 +110,9 @@ class BloggerApi
         }
 
         if ($response->getStatusCode() != 200) {
-            if (! empty($body['error']['message'])) {
-                Log::error($body['error']['message'], [
-                    'url' => $url ?? $this->url,
-                ]);
-            }
+            Log::error($body['error']['message'] ?? __('Blog not found.'), [
+                'url' => $url ?? $this->url,
+            ]);
         }
 
         return $body;
@@ -106,6 +125,7 @@ class BloggerApi
     public function posts(string $blogId = null): array
     {
         $response = $this->client->get(($blogId ?? $this->blogId).'/posts', [
+            'headers' => $this->headers,
             'query' => [
                 'key' => $this->key,
             ]
@@ -118,11 +138,9 @@ class BloggerApi
         }
 
         if ($response->getStatusCode() != 200) {
-            if (! empty($body['error']['message'])) {
-                Log::error($body['error']['message'], [
-                    'blog_id' => $blogId ?? $this->blogId,
-                ]);
-            }
+            Log::error($body['error']['message'] ?? __('Posts not found.'), [
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
         }
 
         $items = collect($body['items'])->map(function ($item){
@@ -156,12 +174,10 @@ class BloggerApi
         }
 
         if ($response->getStatusCode() != 200) {
-            if (! empty($body['error']['message'])) {
-                Log::error($body['error']['message'], [
-                    'post_id' => $postId,
-                    'blog_id' => $blogId ?? $this->blogId,
-                ]);
-            }
+            Log::error($body['error']['message'] ?? __('Post not found.'), [
+                'post_id' => $postId,
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
         }
 
         if (isset($body['blog'])) {
@@ -206,6 +222,7 @@ class BloggerApi
     public function search(string $keyword = '', string $blogId= null): array
     {
         $response = $this->client->get(($blogId ?? $this->blogId).'/posts/search', [
+            'headers' => $this->headers,
             'query' => [
                 'key' => $this->key,
                 'q' => $keyword,
@@ -243,13 +260,75 @@ class BloggerApi
 
     }
 
-    public function pages(string $blogId)
+    /**
+     * @param string|null $blogId
+     * @return array
+     */
+    public function pages(string $blogId = null): array
     {
-        
+        $response = $this->client->get(($blogId ?? $this->blogId).'/pagess', [
+            'headers' => $this->headers,
+            'query' => [
+                'key' => $this->key,
+            ]
+        ]);
+
+        $pages = json_decode((string) $response->getBody(), true);
+
+        if (empty($pages)) {
+            return [];
+        }
+
+        if ($response->getStatusCode() != 200) {
+            Log::error($pages['error']['message'] ?? __('Pages not found.'), [
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
+        }
+
+        if (! empty($pages['items'])) {
+            $items = collect($pages['items'])->map(function ($item){
+                $item['blog']['path'] = $this->addPath($item);
+
+                return $item;
+            });
+
+            $pages['items'] = $items;
+        }
+
+        return $pages;
     }
 
-    public function page(string $pageId, string $blogId = null)
+    /**
+     * @param string $pageId
+     * @param string|null $blogId
+     * @return array
+     */
+    public function page(string $pageId, string $blogId = null): array
     {
+        $response = $this->client->get(($blogId ?? $this->blogId).'/pages/'.$pageId, [
+            'headers' => $this->headers,
+            'query' => [
+                'key' => $this->key
+            ],
+        ]);
 
+        $page = json_decode((string) $response->getBody(), true);
+
+        if (empty($page)) {
+            return [];
+        }
+
+        if ($response->getStatusCode() != 200) {
+            Log::error($page['error']['message'] ?? __('Page not found.'), [
+                'page_id' => $pageId,
+                'blog_id' => $blogId ?? $this->blogId,
+            ]);
+        }
+
+        if (! empty($page['blog'])) {
+            $page['blog']['path'] = $this->addPath($page);
+        }
+
+        return $page;
     }
 }
