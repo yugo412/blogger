@@ -208,7 +208,7 @@ Route::get('blogger/page/{id}', 'BloggerController@page');
 
 ## Demo & Sample Code
 
-Full running application can be found at [blogger.aplikasi.live](blogger.aplikasi.live). You can look at the code from this [repository](https://github.com/arvernester/blogger-demo).
+Full running application can be found at [blogger.aplikasi.live](http://blogger.aplikasi.live). You can look at the code from this [repository](https://github.com/arvernester/blogger-demo).
 
 ## License
 
