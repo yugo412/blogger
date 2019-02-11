@@ -81,6 +81,12 @@ $pages = Blogger::pages($blog['id']);
 $page = Blogger::page($pageId, $blogId);
 ```
 
+If you want to include images in post, you can chain method `withImages(bool $withImages = true)`, for example:
+
+```php
+$posts = Blogger::withImages()->posts();
+```
+
 ## Best Practice
 When you retrieving posts or pages, you must define blog id in every method. If you only have one blog and static blog id, you can follow this sample code for best practice.
 ```php

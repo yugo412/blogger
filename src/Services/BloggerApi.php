@@ -34,11 +34,15 @@ class BloggerApi
      */
     private $client;
 
-
     /**
      * @var array
      */
     private $headers = [];
+
+    /**
+     * @var bool
+     */
+    private $fetchImages = false;
 
     public function __construct()
     {
@@ -69,6 +73,7 @@ class BloggerApi
     {
         $defaultQuery = [
             'key' => $this->key,
+            'fetchImages' => $this->fetchImages ? 'true' : 'false',
         ];
 
         return $this->client->get($path, [
@@ -99,6 +104,17 @@ class BloggerApi
     public function setBlog(string $blogId): self
     {
         $this->blogId = $blogId;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $withImages
+     * @return BloggerApi
+     */
+    public function withImages(bool $withImages = true): self
+    {
+        $this->fetchImages = $withImages;
 
         return $this;
     }
